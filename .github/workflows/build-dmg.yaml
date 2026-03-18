@@ -9,7 +9,7 @@ jobs:
 
     steps:
 
-    # 1️⃣ Clone Bitbucket Repository (no env)
+    # 1️⃣ Clone Bitbucket Repository
     - name: Clone Repository
       run: |
         git clone https://first40-admin:${{ secrets.BITBUCKET_PIPELINE123 }}@bitbucket.org/trirope-tech/pinaslotto-game-client.git
@@ -26,42 +26,51 @@ jobs:
         which flutter
         flutter --version
 
-    # 4️⃣ Flutter Setup
-    - name: Flutter Setup
+    # 4️⃣ Auto-detect Flutter project folder
+    - name: Detect Flutter Project
       run: |
         cd pinaslotto-game-client
+        PROJECT_DIR=$(find . -name pubspec.yaml | head -n 1 | xargs dirname)
+        echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+        echo "Detected project at $PROJECT_DIR"
+
+    # 5️⃣ Flutter Setup
+    - name: Flutter Setup
+      run: |
+        cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
         flutter clean
         flutter pub get
 
-    # 5️⃣ Enable macOS
+    # 6️⃣ Enable macOS
     - name: Enable macOS
       run: flutter config --enable-macos-desktop
 
-    # 6️⃣ Build macOS
+    # 7️⃣ Build macOS
     - name: Build macOS
       run: |
-        cd pinaslotto-game-client
+        cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
         flutter build macos --release
 
-    # 7️⃣ Install DMG tool
+    # 8️⃣ Install DMG tool
     - name: Install create-dmg
       run: brew install create-dmg
 
-    # 8️⃣ Create DMG
+    # 9️⃣ Create DMG
     - name: Create DMG
       run: |
-        cd pinaslotto-game-client
+        cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
 
         APP_PATH=$(find build/macos -name "*.app" | head -n 1)
+        echo "App path: $APP_PATH"
 
         create-dmg \
           --volname "PinaSlotto" \
-          "PinaSlotto-1.0.7.dmg" \
+          "PinaSlotto.dmg" \
           "$APP_PATH"
 
-    # 9️⃣ Upload DMG (v4 fixed)
+    # 🔟 Upload DMG
     - name: Upload DMG
       uses: actions/upload-artifact@v4
       with:
         name: macos-dmg
-        path: pinaslotto-game-client/PinaSlotto-*.dmg
+        path: pinaslotto-game-client/${{ env.PROJECT_DIR }}/PinaSlotto.dmg
