@@ -1,42 +1,73 @@
-name: Build DMG
+name: Flutter macOS DMG Build
 
 on:
-  workflow_dispatch:   # manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-latest
-
+    
     steps:
 
-    - name: Clone Bitbucket Repo
+    # 1️⃣ Clone Bitbucket Repository
+    - name: Clone Repository
+      env:
+        BB_TOKEN: ${{ secrets.BITBUCKET_PIPELINE123 }}
       run: |
-        git clone https://${{ secrets.BITBUCKET_USERNAME }}:${{ secrets.BITBUCKET_APP_PASSWORD }}@bitbucket.org/YOUR_ORG/YOUR_REPO.git
+        git clone https://first40-admin:$BB_TOKEN@bitbucket.org/trirope-tech/pinaslotto-game-client.git
 
-    - name: Setup Java
-      uses: actions/setup-java@v3
+    # 2️⃣ Setup Flutter
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
       with:
-        distribution: temurin
-        java-version: 17
+        channel: stable
 
-    - name: Build JAR
+    # 3️⃣ Verify Flutter
+    - name: Check Flutter
       run: |
-        cd YOUR_REPO
-        mvn clean package
+        which flutter
+        flutter --version
 
+    # 4️⃣ Prepare Project (like Jenkins script)
+    - name: Flutter Setup
+      run: |
+        cd pinaslotto-game-client
+        flutter clean
+        flutter pub get
+
+    # 5️⃣ Enable macOS support
+    - name: Enable macOS
+      run: flutter config --enable-macos-desktop
+
+    # 6️⃣ Build macOS App
+    - name: Build macOS
+      run: |
+        cd pinaslotto-game-client
+        flutter build macos --release
+
+    # 7️⃣ Install DMG tool
+    - name: Install create-dmg
+      run: brew install create-dmg
+
+    # 8️⃣ Create DMG
     - name: Create DMG
       run: |
-        cd YOUR_REPO
+        cd pinaslotto-game-client
 
-        jpackage \
-          --input target/ \
-          --name MyApp \
-          --main-jar YOUR_JAR_NAME.jar \
-          --type dmg \
-          --dest output
+        APP_PATH=$(find build/macos -name "*.app" | head -n 1)
+        echo "App path: $APP_PATH"
 
+        create-dmg \
+          --volname "PinaSlotto" \
+          --window-size 800 400 \
+          --icon-size 100 \
+          --app-drop-link 600 185 \
+          "PinaSlotto-${VERSION_NAME}.dmg" \
+          "$APP_PATH"
+
+    # 9️⃣ Upload DMG Artifact
     - name: Upload DMG
       uses: actions/upload-artifact@v3
       with:
-        name: dmg-file
-        path: YOUR_REPO/output/*.dmg
+        name: macos-dmg
+        path: pinaslotto-game-client/PinaSlotto-*.dmg
