@@ -53,15 +53,18 @@ jobs:
         flutter clean
         flutter pub get
 
-    # 8️⃣ Enable macOS
-    - name: Enable macOS
-      run: flutter config --enable-macos-desktop
+    # 8️⃣ Enable macOS project
+    - name: Enable macOS project
+      run: |
+        cd pinaslotto-game-client
+        flutter config --enable-macos-desktop
+        flutter create .
 
     # 9️⃣ Build macOS
     - name: Build macOS
       run: |
-        cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
-        flutter build macos --release
+        cd pinaslotto-game-client
+        flutter build macos --releasee
 
     # 🔟 Install DMG tool
     - name: Install create-dmg
