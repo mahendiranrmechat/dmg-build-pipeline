@@ -64,7 +64,7 @@ jobs:
     - name: Build macOS
       run: |
         cd pinaslotto-game-client
-        flutter build macos --releasee
+        flutter build macos --release
 
     # 🔟 Install DMG tool
     - name: Install create-dmg
