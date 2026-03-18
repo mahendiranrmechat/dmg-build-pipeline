@@ -6,15 +6,13 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    
+
     steps:
 
-    # 1️⃣ Clone Bitbucket Repository
+    # 1️⃣ Clone Bitbucket Repository (no env)
     - name: Clone Repository
-      env:
-        BB_TOKEN: ${{ secrets.BITBUCKET_PIPELINE123 }}
       run: |
-        git clone https://first40-admin:$BB_TOKEN@bitbucket.org/trirope-tech/pinaslotto-game-client.git
+        git clone https://first40-admin:${{ secrets.BITBUCKET_PIPELINE123 }}@bitbucket.org/trirope-tech/pinaslotto-game-client.git
 
     # 2️⃣ Setup Flutter
     - name: Setup Flutter
@@ -22,24 +20,24 @@ jobs:
       with:
         channel: stable
 
-    # 3️⃣ Verify Flutter
+    # 3️⃣ Check Flutter
     - name: Check Flutter
       run: |
         which flutter
         flutter --version
 
-    # 4️⃣ Prepare Project (like Jenkins script)
+    # 4️⃣ Flutter Setup
     - name: Flutter Setup
       run: |
         cd pinaslotto-game-client
         flutter clean
         flutter pub get
 
-    # 5️⃣ Enable macOS support
+    # 5️⃣ Enable macOS
     - name: Enable macOS
       run: flutter config --enable-macos-desktop
 
-    # 6️⃣ Build macOS App
+    # 6️⃣ Build macOS
     - name: Build macOS
       run: |
         cd pinaslotto-game-client
@@ -55,19 +53,15 @@ jobs:
         cd pinaslotto-game-client
 
         APP_PATH=$(find build/macos -name "*.app" | head -n 1)
-        echo "App path: $APP_PATH"
 
         create-dmg \
           --volname "PinaSlotto" \
-          --window-size 800 400 \
-          --icon-size 100 \
-          --app-drop-link 600 185 \
-          "PinaSlotto-${VERSION_NAME}.dmg" \
+          "PinaSlotto-1.0.7.dmg" \
           "$APP_PATH"
 
-    # 9️⃣ Upload DMG Artifact
+    # 9️⃣ Upload DMG (v4 fixed)
     - name: Upload DMG
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: macos-dmg
         path: pinaslotto-game-client/PinaSlotto-*.dmg
