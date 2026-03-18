@@ -12,8 +12,7 @@ jobs:
     # 1️⃣ Clone Bitbucket Repo
     - name: Clone Repository
       run: |
-        git clone https://first40-admin:${{ secrets.BITBUCKET_PIPELINE123 }}@bitbucket.org/trirope-tech/pinaslotto-game-client.git
-
+        git clone -b feature/common-build https://first40-admin:${{ secrets.BITBUCKET_PIPELINE123 }}@bitbucket.org/trirope-tech/pinaslotto-game-client.git
     # 2️⃣ Check root folder
     - name: Check Root Folder
       run: |
