@@ -9,53 +9,66 @@ jobs:
 
     steps:
 
-    # 1️⃣ Clone Bitbucket Repository
+    # 1️⃣ Clone Bitbucket Repo
     - name: Clone Repository
       run: |
         git clone https://first40-admin:${{ secrets.BITBUCKET_PIPELINE123 }}@bitbucket.org/trirope-tech/pinaslotto-game-client.git
 
-    # 2️⃣ Setup Flutter
+    # 2️⃣ Check root folder
+    - name: Check Root Folder
+      run: |
+        pwd
+        ls -l
+
+    # 3️⃣ Check inside repo
+    - name: Check Repo Structure
+      run: |
+        cd pinaslotto-game-client
+        pwd
+        ls -R
+
+    # 4️⃣ Find Flutter project (IMPORTANT)
+    - name: Find pubspec.yaml
+      run: |
+        cd pinaslotto-game-client
+        find . -name pubspec.yaml
+
+    # 5️⃣ Setup Flutter
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: stable
 
-    # 3️⃣ Check Flutter
-    - name: Check Flutter
-      run: |
-        which flutter
-        flutter --version
-
-    # 4️⃣ Auto-detect Flutter project folder
+    # 6️⃣ Auto detect project path
     - name: Detect Flutter Project
       run: |
         cd pinaslotto-game-client
         PROJECT_DIR=$(find . -name pubspec.yaml | head -n 1 | xargs dirname)
         echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-        echo "Detected project at $PROJECT_DIR"
+        echo "Detected project: $PROJECT_DIR"
 
-    # 5️⃣ Flutter Setup
+    # 7️⃣ Flutter Setup
     - name: Flutter Setup
       run: |
         cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
         flutter clean
         flutter pub get
 
-    # 6️⃣ Enable macOS
+    # 8️⃣ Enable macOS
     - name: Enable macOS
       run: flutter config --enable-macos-desktop
 
-    # 7️⃣ Build macOS
+    # 9️⃣ Build macOS
     - name: Build macOS
       run: |
         cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
         flutter build macos --release
 
-    # 8️⃣ Install DMG tool
+    # 🔟 Install DMG tool
     - name: Install create-dmg
       run: brew install create-dmg
 
-    # 9️⃣ Create DMG
+    # 1️⃣1️⃣ Create DMG
     - name: Create DMG
       run: |
         cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
@@ -68,7 +81,7 @@ jobs:
           "PinaSlotto.dmg" \
           "$APP_PATH"
 
-    # 🔟 Upload DMG
+    # 1️⃣2️⃣ Upload DMG
     - name: Upload DMG
       uses: actions/upload-artifact@v4
       with:
