@@ -2,6 +2,8 @@ name: PSG Lotto macOS DMG Build
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
@@ -9,62 +11,59 @@ jobs:
 
     steps:
 
-    # 1️⃣ Clone Bitbucket Repo (NEW REPO)
-    - name: Clone Repository
-      run: |
-        git clone -b develop https://first40-admin:${{ secrets.BITBUCKET_PIPELINE123 }}@bitbucket.org/trirope-tech/psglotto.git
+    # ✅ 1. Checkout code from GitHub
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    # 2️⃣ Verify repo
-    - name: Check Files
-      run: |
-        cd psglotto
-        pwd
-        ls -l
-
-    # 3️⃣ Setup Flutter
+    # ✅ 2. Setup Flutter SDK
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: stable
 
-    # 4️⃣ Install dependencies
-    - name: Flutter Setup
+    # ✅ 3. Cache Flutter dependencies (faster builds)
+    - name: Cache pub packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.pub-cache
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+
+    # ✅ 4. Install dependencies
+    - name: Install Dependencies
       run: |
-        cd psglotto
         flutter clean
         flutter pub get
 
-    # 5️⃣ Enable macOS support (FORCE FIX)
-    - name: Enable macOS Support
-      run: |
-        cd psglotto
-        flutter config --enable-macos-desktop
-        flutter create . --platforms=macos
+    # ✅ 5. Verify macOS support (safe check, no modification)
+    - name: Verify macOS support
+      run: flutter doctor -v
 
-    # 6️⃣ Build macOS
+    # ✅ 6. Build macOS app
     - name: Build macOS
-      run: |
-        cd psglotto
-        flutter build macos --release
+      run: flutter build macos --release
 
-    # 7️⃣ Install DMG tool
+    # ✅ 7. Install DMG tool
     - name: Install create-dmg
       run: brew install create-dmg
 
-    # 8️⃣ Create DMG
+    # ✅ 8. Create DMG file
     - name: Create DMG
       run: |
-        cd psglotto
         APP_PATH=$(find build/macos -name "*.app" | head -n 1)
+
+        echo "App path: $APP_PATH"
 
         create-dmg \
           --volname "PSGLotto" \
-          "PSGLotto.dmg" \
-          "$APP_PATH"
+          --window-size 600 400 \
+          --icon-size 100 \
+          --app-drop-link 450 200 \
+          "$APP_PATH" \
+          "PSGLotto.dmg"
 
-    # 9️⃣ Upload DMG
+    # ✅ 9. Upload DMG artifact
     - name: Upload DMG
       uses: actions/upload-artifact@v4
       with:
         name: macos-dmg
-        path: psglotto/PSGLotto.dmg
+        path: PSGLotto.dmg
