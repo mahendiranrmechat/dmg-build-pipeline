@@ -11,23 +11,20 @@ jobs:
 
     steps:
 
-    # ✅ 1. Checkout repository
+    # ✅ 1. Checkout
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # ✅ 2. Setup Flutter (FIXED VERSION for Dart >= 3.5)
+    # ✅ 2. Setup Flutter (FORCED VERSION - NO CACHE)
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.22.0'
-        channel: stable
+        cache: false
 
-    # ✅ 3. Cache dependencies
-    - name: Cache pub packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.pub-cache
-        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+    # ✅ 3. Verify Flutter & Dart version (DEBUG - IMPORTANT)
+    - name: Check Flutter Version
+      run: flutter --version
 
     # ✅ 4. Install dependencies
     - name: Install Dependencies
@@ -35,14 +32,14 @@ jobs:
         flutter clean
         flutter pub get
 
-    # ✅ 5. Install CocoaPods (CRITICAL FIX)
+    # ✅ 5. Install CocoaPods (fix macOS build issues)
     - name: Install CocoaPods
       run: |
         cd macos
         pod install
         cd ..
 
-    # ✅ 6. Verify environment
+    # ✅ 6. Doctor check
     - name: Flutter Doctor
       run: flutter doctor -v
 
@@ -54,7 +51,7 @@ jobs:
     - name: Install create-dmg
       run: brew install create-dmg
 
-    # ✅ 9. Create DMG file
+    # ✅ 9. Create DMG
     - name: Create DMG
       run: |
         APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1 | head -n 1)
@@ -69,7 +66,7 @@ jobs:
           "PSGLotto.dmg" \
           "$APP_PATH"
 
-    # ✅ 10. Upload DMG artifact
+    # ✅ 10. Upload DMG
     - name: Upload DMG
       uses: actions/upload-artifact@v4
       with:
