@@ -34,9 +34,9 @@ dependencies:
   #   # path: E:/source_tree/series-2d
   series_2d:
     git:
-      url: https://github.com/mahendiranrmechat/2d-series-repo.git
-      ref: 2d-series-repo
-      path: .
+      url: https://github.com/mahendiranrmechat/series_2d.git
+      ref: series_2d
+      path:
 
 
   # The following adds the Cupertino Icons font to your application.
