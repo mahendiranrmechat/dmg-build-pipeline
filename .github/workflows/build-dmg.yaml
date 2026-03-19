@@ -1,4 +1,4 @@
-name: Flutter macOS DMG Build
+name: PSG Lotto macOS DMG Build
 
 on:
   workflow_dispatch:
@@ -9,83 +9,63 @@ jobs:
 
     steps:
 
-    # 1️⃣ Clone Bitbucket Repo
+    # 1️⃣ Clone Bitbucket Repo (NEW REPO)
     - name: Clone Repository
       run: |
-        git clone -b feature/common-build https://first40-admin:${{ secrets.BITBUCKET_PIPELINE123 }}@bitbucket.org/trirope-tech/pinaslotto-game-client.git
-    # 2️⃣ Check root folder
-    - name: Check Root Folder
+        git clone -b feature/common-build https://first40-admin:${{ secrets.BITBUCKET_PIPELINE123 }}@bitbucket.org/trirope-tech/psglotto.git
+
+    # 2️⃣ Verify repo
+    - name: Check Files
       run: |
+        cd psglotto
         pwd
         ls -l
 
-    # 3️⃣ Check inside repo
-    - name: Check Repo Structure
-      run: |
-        cd pinaslotto-game-client
-        pwd
-        ls -R
-
-    # 4️⃣ Find Flutter project (IMPORTANT)
-    - name: Find pubspec.yaml
-      run: |
-        cd pinaslotto-game-client
-        find . -name pubspec.yaml
-
-    # 5️⃣ Setup Flutter
+    # 3️⃣ Setup Flutter
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: stable
 
-    # 6️⃣ Auto detect project path
-    - name: Detect Flutter Project
-      run: |
-        cd pinaslotto-game-client
-        PROJECT_DIR=$(find . -name pubspec.yaml | head -n 1 | xargs dirname)
-        echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-        echo "Detected project: $PROJECT_DIR"
-
-    # 7️⃣ Flutter Setup
+    # 4️⃣ Install dependencies
     - name: Flutter Setup
       run: |
-        cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
+        cd psglotto
         flutter clean
         flutter pub get
 
-    # 8️⃣ Enable macOS project
-    - name: Enable macOS project
+    # 5️⃣ Enable macOS support (FORCE FIX)
+    - name: Enable macOS Support
       run: |
-        cd pinaslotto-game-client
+        cd psglotto
         flutter config --enable-macos-desktop
-        flutter create .
+        rm -rf macos
+        flutter create . --platforms=macos
 
-    # 9️⃣ Build macOS
+    # 6️⃣ Build macOS
     - name: Build macOS
       run: |
-        cd pinaslotto-game-client
+        cd psglotto
         flutter build macos --release
 
-    # 🔟 Install DMG tool
+    # 7️⃣ Install DMG tool
     - name: Install create-dmg
       run: brew install create-dmg
 
-    # 1️⃣1️⃣ Create DMG
+    # 8️⃣ Create DMG
     - name: Create DMG
       run: |
-        cd pinaslotto-game-client/${{ env.PROJECT_DIR }}
-
+        cd psglotto
         APP_PATH=$(find build/macos -name "*.app" | head -n 1)
-        echo "App path: $APP_PATH"
 
         create-dmg \
-          --volname "PinaSlotto" \
-          "PinaSlotto.dmg" \
+          --volname "PSGLotto" \
+          "PSGLotto.dmg" \
           "$APP_PATH"
 
-    # 1️⃣2️⃣ Upload DMG
+    # 9️⃣ Upload DMG
     - name: Upload DMG
       uses: actions/upload-artifact@v4
       with:
         name: macos-dmg
-        path: pinaslotto-game-client/${{ env.PROJECT_DIR }}/PinaSlotto.dmg
+        path: psglotto/PSGLotto.dmg
