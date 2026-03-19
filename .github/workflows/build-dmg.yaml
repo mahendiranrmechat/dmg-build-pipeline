@@ -39,7 +39,6 @@ jobs:
       run: |
         cd psglotto
         flutter config --enable-macos-desktop
-        rm -rf macos
         flutter create . --platforms=macos
 
     # 6️⃣ Build macOS
