@@ -11,50 +11,56 @@ jobs:
 
     steps:
 
-    # ✅ 1. Checkout
+    # ✅ 1. Checkout code
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # ✅ 2. Setup Flutter (FORCED VERSION - NO CACHE)
+    # ✅ 2. Setup Flutter
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.22.0'
-        cache: false
+        channel: stable
 
-    # ✅ 3. Verify Flutter & Dart version (DEBUG - IMPORTANT)
-    - name: Check Flutter Version
-      run: flutter --version
+    # ✅ 3. Cache dependencies
+    - name: Cache pub packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.pub-cache
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
 
-    # ✅ 4. Install dependencies
+    # ✅ 4. Pre-download macOS artifacts (IMPORTANT)
+    - name: Precache macOS
+      run: flutter precache --macos
+
+    # ✅ 5. Install dependencies
     - name: Install Dependencies
       run: |
         flutter clean
         flutter pub get
 
-    # ✅ 5. Install CocoaPods (fix macOS build issues)
+    # ✅ 6. Install CocoaPods (SAFE WAY)
     - name: Install CocoaPods
       run: |
         cd macos
-        pod install
+        pod install --repo-update
         cd ..
 
-    # ✅ 6. Doctor check
-    - name: Flutter Doctor
+    # ✅ 7. Verify setup
+    - name: Verify Flutter Setup
       run: flutter doctor -v
 
-    # ✅ 7. Build macOS app
+    # ✅ 8. Build macOS app
     - name: Build macOS
       run: flutter build macos --release
 
-    # ✅ 8. Install DMG tool
+    # ✅ 9. Install DMG tool
     - name: Install create-dmg
       run: brew install create-dmg
 
-    # ✅ 9. Create DMG
+    # ✅ 10. Create DMG
     - name: Create DMG
       run: |
-        APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1 | head -n 1)
+        APP_PATH=$(find build/macos -name "*.app" | head -n 1)
 
         echo "App path: $APP_PATH"
 
@@ -63,10 +69,10 @@ jobs:
           --window-size 600 400 \
           --icon-size 100 \
           --app-drop-link 450 200 \
-          "PSGLotto.dmg" \
-          "$APP_PATH"
+          "$APP_PATH" \
+          "PSGLotto.dmg"
 
-    # ✅ 10. Upload DMG
+    # ✅ 11. Upload artifact
     - name: Upload DMG
       uses: actions/upload-artifact@v4
       with:
