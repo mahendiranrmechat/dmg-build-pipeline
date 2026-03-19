@@ -11,15 +11,15 @@ jobs:
 
     steps:
 
-    # ✅ 1. Checkout code
+    # ✅ 1. Checkout repository
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # ✅ 2. Setup Flutter (fixed version for stability)
+    # ✅ 2. Setup Flutter (FIXED VERSION for Dart >= 3.5)
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.0'
+        flutter-version: '3.22.0'
         channel: stable
 
     # ✅ 3. Cache dependencies
@@ -35,7 +35,7 @@ jobs:
         flutter clean
         flutter pub get
 
-    # ✅ 5. Install CocoaPods (IMPORTANT FIX)
+    # ✅ 5. Install CocoaPods (CRITICAL FIX)
     - name: Install CocoaPods
       run: |
         cd macos
@@ -54,7 +54,7 @@ jobs:
     - name: Install create-dmg
       run: brew install create-dmg
 
-    # ✅ 9. Create DMG
+    # ✅ 9. Create DMG file
     - name: Create DMG
       run: |
         APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1 | head -n 1)
@@ -69,7 +69,7 @@ jobs:
           "PSGLotto.dmg" \
           "$APP_PATH"
 
-    # ✅ 10. Upload artifact
+    # ✅ 10. Upload DMG artifact
     - name: Upload DMG
       uses: actions/upload-artifact@v4
       with:
