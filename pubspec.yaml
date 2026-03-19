@@ -35,7 +35,7 @@ dependencies:
   series_2d:
     git:
       url: https://github.com/mahendiranrmechat/2d-series-repo.git
-      ref: three_d_series
+      ref: 2d-series-repo
       path: .
 
 
