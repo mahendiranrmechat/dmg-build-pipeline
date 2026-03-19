@@ -34,10 +34,9 @@ dependencies:
   #   # path: E:/source_tree/series-2d
   series_2d:
     git:
-      url: https://first40-admin:ATBBKG2nWuZYQnKcLR34pPnnwGLR642A18FE@bitbucket.org/trirope-tech/2d-series-pro.git
+      url: https://github.com/mahendiranrmechat/2d-series-repo.git
       ref: three_d_series
       path: .
-
 
 
   # The following adds the Cupertino Icons font to your application.
