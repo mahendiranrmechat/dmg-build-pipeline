@@ -28,7 +28,7 @@ jobs:
         path: ~/.pub-cache
         key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
 
-    # ✅ 4. Pre-download macOS artifacts (IMPORTANT)
+    # ✅ 4. Precache macOS artifacts
     - name: Precache macOS
       run: flutter precache --macos
 
@@ -38,10 +38,12 @@ jobs:
         flutter clean
         flutter pub get
 
-    # ✅ 6. Install CocoaPods (SAFE WAY)
-    - name: Install CocoaPods
+    # 🔥 6. FIX CocoaPods (IMPORTANT)
+    - name: Fix CocoaPods Setup
       run: |
         cd macos
+        rm -rf Pods Podfile.lock
+        pod deintegrate || true
         pod install --repo-update
         cd ..
 
